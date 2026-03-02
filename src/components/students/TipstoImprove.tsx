@@ -11,6 +11,7 @@ export default function TipsCarousel({ tips }: { tips: Tip[] }) {
     return () => clearInterval(id)
   }, [tips.length])
   if (!tips || tips.length === 0) return null
+  
   return (
     <div className="relative w-full">
       <motion.div key={tips[index].id} initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="p-3">

@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -12,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { motion } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
 import ErrorModal from './ErrorModal'
 
 /**
@@ -57,21 +57,27 @@ export default function LoginForm() {
   useEffect(() => {
     fullNameRef.current?.focus()
 
-    // If user already logged in (token + user in localStorage), redirect
+    // Since we use HttpOnly cookies, we rely on the 'user' object in localStorage
+    // to determine if the user is already authenticated on the client side.
     try {
       const userRaw = localStorage.getItem('user')
-      const token = localStorage.getItem('accessToken')
-      if (token && userRaw) {
+      if (userRaw) {
         const user = JSON.parse(userRaw)
-        if (user?.role === 'student') return router.push('/student')
-        if (user?.role === 'teacher') return router.push('/teacher')
-        if (user?.role === 'admin') return router.push('/admin')
-        return router.push('/')
+        if (user?.role === 'student') {
+          return router.push('/student/dashboard')
+        }
+        if (user?.role === 'teacher') {
+          return router.push('/teacher/dashboard')
+        }
+        
+        // If the role is invalid or unrecognized, do not blindly route to `/`. 
+        // Instead, clean up the stale local storage and remain on the login page.
+        localStorage.removeItem('user')
       }
     } catch (err) {
-      console.error('Login error:', err)
-      toast.error('Login failed')
-
+      console.error('Auth state check error:', err)
+      // Clean up potentially corrupted user data
+      localStorage.removeItem('user')
     }
   }, [router])
 
@@ -87,47 +93,41 @@ export default function LoginForm() {
     setLoading(true)
     try {
       const response = await axios.post(
-        '/api/auth/login',
+        '/api/auth/login', // This now hits our Next.js secure proxy
         {
-          registrationno: data.registrationNo,
-          email: data.email.toLowerCase(),
-          password: data.password,
-        },
+          emailOrRegistrationNo: data.email || data.registrationNo,
+           password: data.password,
+          },
         {
           headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
         }
       )
 
-      // Expecting: { data: { user, accesstoken } }
-      const { user, accesstoken } = response.data.data ?? {}
+      const user = response.data.data?.user
 
-      if (!user || !accesstoken) {
+      if (!user) {
         toast.error('Unexpected server response. See details.')
-        setModalDetails(response.data ?? response)
+        setModalDetails(response.data)
         setModalOpen(true)
         setLoading(false)
         return
       }
 
-      localStorage.setItem('accessToken', accesstoken)
+      // We only store the user object in localStorage for UI purposes. 
+      // The accessToken is securely set as an HttpOnly cookie by our Next.js proxy route.
       localStorage.setItem('user', JSON.stringify(user))
 
       toast.success('Login successful! Redirecting...')
 
-      // small delay to show toast
       setTimeout(() => {
-        if (user.role === 'student') router.push('/student/profile')
-        else if (user.role === 'teacher') router.push('/teacher')
-        else if (user.role === 'admin') router.push('/admin')
+        if (user.role === 'student') router.push('/student/dashboard')
+        else if (user.role === 'teacher') router.push('/teacher/dashboard')
         else router.push('/')
       }, 900)
     } catch (err: any) {
       console.error('Login error:', err)
-      // Try to extract structured server error
       const server = err?.response?.data
       if (server?.message || server?.errors) {
-        // show toast + details modal
         toast.error(server.message ?? 'Login failed')
         setModalDetails(server)
         setModalOpen(true)
@@ -149,7 +149,7 @@ export default function LoginForm() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="relative w-full max-w-md rounded-xl p-8 bg-[var(--card-bg)] shadow-[0_20px_50px_rgba(2,6,23,0.5)]"
+        className="relative w-full max-w-md rounded-xl p-8 glass-panel"
       >
         {/* decorative floating circles (pure tailwind + utilities) */}
         <div className="pointer-events-none absolute -left-12 -top-10 h-44 w-44 rounded-full bg-[rgba(245,222,179,0.12)] blur-2xl animate-[float_12s_infinite_ease-in-out]"></div>
@@ -226,14 +226,11 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--bg-primary)] hover:scale-105 transition-transform disabled:opacity-60"
+              className="w-full rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--bg-primary)] shadow-[var(--glow)] hover:scale-105 transition-transform disabled:opacity-60"
             >
               {loading ? (
                 <span className="inline-flex items-center justify-center gap-2">
-                  <svg className="h-4 w-4 animate-spin text-[var(--bg-primary)]" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                  </svg>
+                  <Loader2 className="h-4 w-4 animate-spin text-[var(--bg-primary)]" />
                   Logging in...
                 </span>
               ) : (

@@ -1,5 +1,6 @@
 
 import { motion } from 'framer-motion'
+import { Mail } from 'lucide-react'
 
 export default function StepEmail({
   email,
@@ -17,9 +18,7 @@ export default function StepEmail({
       exit={{ opacity: 0, x: -30 }}
       className="space-y-4"
     >
-      <svg className="mx-auto h-16 w-16 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeWidth="1.5" d="M21 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18 0a2 2 0 00-2-2H5a2 2 0 00-2 2m18 0l-9 6-9-6" />
-      </svg>
+      <Mail className="mx-auto h-16 w-16 text-[var(--accent)]" strokeWidth={1.5} />
 
       <input
         value={email}

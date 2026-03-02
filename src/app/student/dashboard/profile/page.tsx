@@ -18,8 +18,9 @@ import StatsSection from '../../../../components/students/StatsSection'
 import FeesSection from '../../../../components/students/FeesSection'
 import StatusCard from '../../../../components/students/StatusCard'
 import StatusDetail from '../../../../components/students/StatusDetail'
-import Navbar from '@/src/components/students/layouts/Navbar'
-import Footer from '@/src/components/students/layouts/Footer'
+
+import Footer from '@/src/components/layouts/Footerstu'
+import Navbar from '@/src/components/layouts/Navbar'
 
 
 
@@ -124,7 +125,7 @@ export default function ProfilePage() {
     <Navbar/>
       <ToastContainer position="top-right" autoClose={3000} />
       {/* <AnimatedBackground /> */}
-      <main className="p-8 max-w-[1100px] mx-auto">
+      <main className="p-8 max-w-[1100px] mx-auto mt-16">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
           <ProfileHeader profile={profile} onScanClick={() => setQrOpen(true)} onEditClick={() => setEditOpen(true)} onEnrollMac={async () => {
             const mac = prompt('Enter MAC (format XX:XX:XX:XX:XX:XX)')

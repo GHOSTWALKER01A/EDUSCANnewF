@@ -111,7 +111,7 @@ export default function VerifyPage() {
       // small delay so toast shows
       setTimeout(() => {
         if (user.role === 'student') router.push('/student/dashboard/profile')
-        else if (user.role === 'teacher') router.push('/teacher/dashboard/profile')
+        else if (user.role === 'teacher') router.push('/teacher/dashboard/teacherprofile')
         else router.push('/')
       }, 900)
     } catch (err: any) {

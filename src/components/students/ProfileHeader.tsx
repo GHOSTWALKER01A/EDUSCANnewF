@@ -32,6 +32,8 @@ export default function ProfileHeader({ profile, onScanClick, onEditClick, onEnr
             <div>Email: <strong className="text-white">{profile.email}</strong></div>
             <div>Phone: <strong className="text-white">{profile.phoneNumber || '—'}</strong></div>
             <div>Branch / Semester: <strong className="text-white">{profile.branch} / {profile.semester}</strong></div>
+            <div>Join Date: <strong className="text-white">{profile.joinDate}</strong></div>
+            
           </div>
 
           <div className="mt-4 flex gap-3">

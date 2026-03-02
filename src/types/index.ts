@@ -5,12 +5,18 @@ export interface IUser {
   email: string;
   registrationNo?: string;
   phoneNumber: string;
-  semester?: string;
+  semester?: number;
   branch?: string;
+  grade?: string;
+  department?: string;
   profilePhoto?: string;
   macHash?: string | null;
+  attendancePercentage?: number;
+  riskPercentage?: number;
+  blocked?: boolean;
+  Id?: string;
   role: 'student' | 'teacher' ;
-  join_date?: string;
+  joinDate?: string;
 }
 
 export interface IAssignment {

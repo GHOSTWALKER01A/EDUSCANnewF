@@ -1,5 +1,6 @@
 
 import { motion } from 'framer-motion'
+import { ShieldCheck } from 'lucide-react'
 
 export default function StepOTP({
   otp,
@@ -17,10 +18,7 @@ export default function StepOTP({
       exit={{ opacity: 0, x: -30 }}
       className="space-y-4"
     >
-      <svg className="mx-auto h-16 w-16 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path strokeWidth="1.5" d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3v3h-6v-3z" />
-        <path strokeWidth="1.5" d="M6 11h12v10H6z" />
-      </svg>
+      <ShieldCheck className="mx-auto h-16 w-16 text-[var(--accent)]" strokeWidth={1.5} />
 
       <input
         value={otp}

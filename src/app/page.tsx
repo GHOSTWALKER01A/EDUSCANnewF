@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Navbardummy from '../components/Navbardummy'
-import Footer from '../components/Footer'
+import Footer from '../components/layouts/Footer'
 import EduscanIntro from '../components/EduscanIntro'
 import EduScanLoader from '../components/EduscanLoader'
 import { motion } from 'framer-motion'

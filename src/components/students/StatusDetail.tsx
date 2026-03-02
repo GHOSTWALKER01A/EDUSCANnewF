@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { StudentMetrics } from '../../types/metrics'
 import { motion } from 'framer-motion'
 
-export default function StatusDetail({ metrics, onChecklistChange }: { metrics: StudentMetrics, onChecklistChange?: (items: any[]) => void }) {
+export default function StatusDetail({ metrics, onChecklistChange }:
+   { metrics: StudentMetrics, onChecklistChange?: (items: any[]) => void }) {
+    console.log(metrics)
   const [items, setItems] = useState(metrics.checklist || [])
 
   useEffect(() => setItems(metrics.checklist || []), [metrics.checklist])

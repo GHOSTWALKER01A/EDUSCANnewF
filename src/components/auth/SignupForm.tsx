@@ -193,10 +193,9 @@ export default function SignupForm() {
           </div>
         </div>
 
-        {/* Form layout: two columns on wide screens */}
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left column */}
-          <div className="space-y-3">
+        {/* Form layout: flexible grid */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="sr-only" htmlFor="fullName">Full Name</label>
               <input
@@ -218,7 +217,7 @@ export default function SignupForm() {
               <label className="sr-only">Role</label>
               <select
                 {...register('role')}
-                className={clsx('w-full rounded-lg border px-3 py-2 bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]', errors.role && 'ring-1 ring-red-400')}
+                className={clsx('w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]', errors.role && 'ring-1 ring-red-400')}
               >
                 <option value="">Select Role</option>
                 <option value="student">Student</option>
@@ -238,17 +237,6 @@ export default function SignupForm() {
             </div>
 
             <div>
-              <label className="sr-only">Password</label>
-              <input
-                type="password"
-                {...register('password')}
-                placeholder="Password (min 6 chars)"
-                className={clsx('w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]', errors.password && 'ring-1 ring-red-400')}
-              />
-              {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message as string}</p>}
-            </div>
-
-            <div>
               <label className="sr-only">Phone</label>
               <input
                 {...register('phoneNumber')}
@@ -260,26 +248,34 @@ export default function SignupForm() {
               {errors.phoneNumber && <p className="mt-1 text-xs text-red-400">{errors.phoneNumber.message as string}</p>}
             </div>
 
+            <div>
+              <label className="sr-only">Password</label>
+              <input
+                type="password"
+                {...register('password')}
+                placeholder="Password (min 6 chars)"
+                className={clsx('w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]', errors.password && 'ring-1 ring-red-400')}
+              />
+              {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message as string}</p>}
+            </div>
+
             {/* profile photo */}
             <div className="flex items-center gap-3">
-              <label className="inline-flex flex-col items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer bg-[var(--bg-primary)]">
+              <label className="inline-flex flex-col items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-sm cursor-pointer bg-[var(--bg-primary)] border-dashed border-[var(--bg-secondary)] hover:border-[var(--accent)] transition-colors w-full sm:w-auto h-full min-h-[42px]">
                 <input type="file" accept="image/*" onChange={(e) => onFileChange(e.target.files)} className="hidden" />
-                <span className="text-sm text-[var(--text-secondary)]">Upload profile (optional)</span>
+                <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">Upload profile (optional)</span>
               </label>
 
-              <div className="text-xs text-[var(--text-secondary)]">
+              <div className="text-[10px] text-[var(--text-secondary)] leading-tight">
                 <div>Max 3 MB</div>
                 <div>JPEG/PNG</div>
               </div>
             </div>
-          </div>
 
-          {/* Right column (role-specific + submit) */}
-          <div className="space-y-3">
             {/* student fields */}
             {role === 'student' && (
               <>
-                <div>
+                <div className="md:col-span-2">
                   <input
                     {...register('registrationNo')}
                     placeholder="Registration Number"
@@ -287,8 +283,8 @@ export default function SignupForm() {
                   />
                 </div>
 
-                <div className="flex gap-3">
-                  <select {...register('semester')} className="w-1/2 rounded-lg border px-3 py-2 bg-[var(--bg-primary)]">
+                <div>
+                  <select {...register('semester')} className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]">
                     <option value="">Semester</option>
                     <option value="1st">1st</option>
                     <option value="2nd">2nd</option>
@@ -299,8 +295,10 @@ export default function SignupForm() {
                     <option value="7th">7th</option>
                     <option value="8th">8th</option>
                   </select>
+                </div>
 
-                  <select {...register('branch')} className="w-1/2 rounded-lg border px-3 py-2 bg-[var(--bg-primary)]">
+                <div>
+                  <select {...register('branch')} className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]">
                     <option value="">Branch</option>
                     <option value="CSE">CSE</option>
                     <option value="CYBERSECURITY">CYBERSECURITY</option>
@@ -319,29 +317,28 @@ export default function SignupForm() {
             {role === 'teacher' && (
               <>
                 <div>
-                  <input {...register('teacherId')} placeholder="Teacher ID" className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)]" />
+                  <input {...register('teacherId')} placeholder="Teacher ID" className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]" />
                 </div>
 
                 <div>
-                  <input {...register('subject')} placeholder="Subject" className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)]" />
+                  <input {...register('subject')} placeholder="Subject" className="w-full rounded-lg border px-3 py-2 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]" />
                 </div>
               </>
             )}
+          </div>
 
-    
-            <div className="mt-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-[var(--bg-primary)] hover:scale-[1.02] transition-transform disabled:opacity-60"
-              >
-                {submitting ? 'Signing up…' : 'Sign Up'}
-              </button>
-            </div>
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-[var(--bg-primary)] hover:scale-[1.02] transition-transform disabled:opacity-60"
+            >
+              {submitting ? 'Signing up…' : 'Sign Up'}
+            </button>
+          </div>
 
-            <div className="mt-3 text-sm text-[var(--text-secondary)]">
-              By signing up you agree to our <Link className="text-[var(--accent)]" href="#">Terms</Link> & <Link className="text-[var(--accent)]" href="#">Privacy</Link>.
-            </div>
+          <div className="mt-3 text-center text-sm text-[var(--text-secondary)]">
+            By signing up you agree to our <Link className="text-[var(--accent)]" href="#">Terms</Link> & <Link className="text-[var(--accent)]" href="#">Privacy</Link>.
           </div>
         </form>
       </motion.div>

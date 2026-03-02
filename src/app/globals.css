@@ -11,35 +11,59 @@
 }
 
 /* CSS variables — tweak these to change the whole palette */
-:root{
-  --accent: #0A84FF;           /* accent color used in headings / buttons */
-  --bg-primary: #0A2239;      /* dark blue background */
-  --bg-secondary: #F5DEB3;    /* warm wheat */
-  --card-bg: rgba(255,255,255,0.04);
-  --text-secondary: #A3BFFA;
-  --shadow: 0 12px 30px rgba(2,6,23,0.35);
+:root {
+  --accent: #00d4ff;           /* Electric Shiny Light Blue */
+  --accent-hover: #00a3cc;     /* Deep Cyan - hover state */
+  --bg-primary: #020617;       /* Deepest Blue */
+  --bg-secondary: #0f172a;     /* Elevated surfaces */
+  --card-bg: rgba(15, 23, 42, 0.45); /* Higher transparency for glass effect */
+  --text-primary: #f8fafc;     /* Bright white text */
+  --text-secondary: #94a3b8;   /* Soft blue-grey */
+  --border-color: rgba(0, 212, 255, 0.2); /* Shiny blue card borders */
+  --glow: 0 0 20px rgba(0, 212, 255, 0.4); /* Button glow */
+  --shadow: 0 12px 40px rgba(0,212,255,0.15); /* Enhanced shiny shadow */
 }
 
 /* body + fonts will be set via layout font variables */
-html,body,#root{
-  height:100%;
+html,
+body,
+#root {
+  height: 100%;
   scroll-behavior: smooth;
 }
 
-body{
-  @apply bg-bgPrimary text-white antialiased;
+body {
+  @apply text-white antialiased;
   font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  /* Shiny radial gradient texture layered over the primary background */
+  background-image: radial-gradient(120% 120% at 50% -10%, #1e3a8a 0%, #020617 100%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
 }
 
 /* small helpers to mimic your previous spacing syntax if needed */
-.container-max{
+.container-max {
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @keyframes float {
-  0%,100% { transform: translateY(0) }
-  50% { transform: translateY(-28px) }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-28px);
+  }
 }
 .animate-\[float_12s_infinite_ease-in-out\] {
   animation: float 12s infinite ease-in-out;
@@ -49,9 +73,15 @@ body{
 }
 
 @keyframes blob {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-18px) scale(1.04); }
-  100% { transform: translateY(0) scale(1); }
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 .input {

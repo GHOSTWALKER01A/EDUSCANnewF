@@ -1,4 +1,56 @@
-// CREATE THE STUDENT LANDING PAGE AS SIMILAR TO THE ABOVE LANDING PAGE BUT THIS PAGE IS THE INTERACTIVE PAGE WITH THE USER/STUDENT SO I WANT YOU TO MAKE THIS PAGE MOST ATTRACTIVE AS THE PAGE CONTAINS A ATTRACTIVE INTRO VIDEO AND AS THE USER MAKE THE CURSOR DOWN THE SMOOTH ANIMATION TAKES PLACE AS THE NAVBAR COMES UPSIDE DOWN AND THE REST  CONTENT COMES FROM DOWN TO UP AND THAT PAGE CONTAINS A BIG DIV THAT SHOWS THE ADVERTISEMENT AND REST ADVERTISEMENT VIDEOS AND DOWN THAT IT WILL SHOW THE EVENTS DIV WHICH CONTAIN FOUR EVENTS AND AS WE CLICK ON THE ANY OF THE DIV  AND 
+"use client"
 
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import NavBar from '../../../components/layouts/NavbarHero'
+import Hero from '../../../components/students/Hero'
+import WelcomePanel from '../../../components/students/WelcomePannel'
+import AttendanceStats from '../../../components/students/AttendanceStatsHero'
+import RiskScore from '../../../components/students/RiskScoreHero'
+import ResourcesGrid from '../../../components/students/ResourceGridHero'
+import EventsGrid from '../../../components/students/EventGridHero'
+import EventModal from '../../../components/students/EventHero'
+import Footer from '@/src/components/layouts/Footerstu'
 
+export default function Home() {
+  const [heroInView, setHeroInView] = useState(true)
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const userName = 'Divya Raj' // replace with actual auth-driven name
 
+  return (
+    <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen">
+      <NavBar heroInView={heroInView} />
+
+      <main>
+        <Hero onHeroInViewChange={(v) => setHeroInView(v)} />
+
+        <WelcomePanel userName={userName} />
+
+        <section className="max-w-7xl mx-auto px-6 md:px-8">
+          <AttendanceStats />
+        </section>
+
+        <section className="max-w-7xl mx-auto px-6 md:px-8">
+          <RiskScore />
+        </section>
+
+        <section className="max-w-7xl mx-auto px-6 md:px-8">
+          <ResourcesGrid />
+        </section>
+
+        <section className="max-w-7xl mx-auto px-6 md:px-8 pb-24">
+          <EventsGrid onOpen={(id) => setSelectedEvent(id)} />
+        </section>
+      </main>
+
+      <EventModal
+        id={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+      />
+
+    <Footer/>
+    
+    </div>
+
+  )
+}
