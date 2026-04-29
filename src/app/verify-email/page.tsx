@@ -8,6 +8,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { motion } from 'framer-motion'
 import api from '../../lib/api' 
+import { useAuth } from '../../context/AuthContext'
 
 export default function VerifyPage() {
   const router = useRouter()
@@ -22,6 +23,8 @@ export default function VerifyPage() {
   const [resendTimer, setResendTimer] = useState<number>(60)
   const [sending, setSending] = useState(false)
   const [verifying, setVerifying] = useState(false)
+
+  const { login } = useAuth()
 
   useEffect(() => {
      
@@ -46,7 +49,7 @@ export default function VerifyPage() {
     }
     try {
       setSending(true)
-      await api.post('/api/auth/send-otp', { email })
+      await api.post('/auth/send-otp', { email })
       toast.success('Verification code sent to your email.')
       setResendTimer(60)
     } catch (err: any) {
@@ -96,7 +99,7 @@ export default function VerifyPage() {
     try {
       setVerifying(true)
 
-      const resp = await api.post('/api/auth/verify-otp', { email, code: otp })
+      const resp = await api.post('/auth/verify-otp', { email, code: otp })
 
       const { user, accessToken } = resp.data.data ?? {}
 
@@ -104,9 +107,8 @@ export default function VerifyPage() {
         toast.error('Verification failed: invalid server response')
         return
       }
-      // save token+user and redirect by role
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('user', JSON.stringify(user))
+      // save token+user using context and redirect by role
+      login(user, accessToken)
       toast.success('User Verified and Registered Successfully — redirecting...')
       // small delay so toast shows
       setTimeout(() => {

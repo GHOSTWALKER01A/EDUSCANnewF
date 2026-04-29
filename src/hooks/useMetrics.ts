@@ -47,7 +47,7 @@ export function useMetrics() {
     let mounted = true
     ;(async () => {
       try {
-        const resp = await api.get('/api/student/metrics') // implement this on backend
+        const resp = await api.get('/student/metrics') // implement this on backend
         if (!mounted) return
         setMetrics(resp.data.data)
       } catch (err) {

@@ -23,7 +23,7 @@
     
 //     (async () => {
 //       try {
-//         const res = await api.get("/api/users/profile");
+//         const res = await api.get("/users/profile");
 //         const d = res.data.data;
 //         setProfile({
 //           name: d.fullname,

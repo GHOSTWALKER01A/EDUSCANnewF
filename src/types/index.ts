@@ -32,7 +32,7 @@ export interface IGradeSubject {
   subject: string;
   midSemester: number;
   practicals: number;
-  semesterExam: number;
+  semester: number;
   finalGrade: number;
 }
 

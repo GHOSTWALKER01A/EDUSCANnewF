@@ -5,12 +5,13 @@ import api from '../lib/api'
 import { getSocket } from '../lib/socket'
 import { useEffect } from 'react'
 import type { AttendanceRow, AttendanceSummary } from '../types/attendance'
+import { toast } from 'react-toastify'
 
 type QueryParams = { subject?: string; from?: string; to?: string; limit?: number }
 
 async function fetchRows({ pageParam = 1, queryKey }: any) {
   const [_key, params] = queryKey
-  const res = await api.get('/api/attendance', { params: { ...params, page: pageParam } })
+  const res = await api.get('/attendance', { params: { ...params, page: pageParam } })
   return res.data.data // expects { events, page, limit, total }
 }
 
@@ -68,7 +69,7 @@ export function useAttendanceSummary() {
   return useQuery<AttendanceSummary>({
     queryKey: ['attendance-summary'],
     queryFn: async () => {
-      const res = await api.get('/api/attendance/summary')
+      const res = await api.get('/attendance/summary')
       return res.data.data as AttendanceSummary
     },
     staleTime: 15 * 1000,
@@ -79,8 +80,33 @@ export function useAttendanceSeries() {
   return useQuery({
     queryKey: ['attendance-series'],
     queryFn: async () => {
-      const res = await api.get('/api/attendance/series')
+      const res = await api.get('/attendance/series')
       return res.data.data 
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export type SubjectAttendanceData = {
+  subject: string
+  present: number
+  total: number
+}
+
+
+
+export function useSubjectAttendance() {
+  return useQuery<SubjectAttendanceData[]>({
+    queryKey: ['attendance-subjects'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/attendance/subject-wise')
+        // Assume backend returns { data: [...] }
+        return res.data.data
+      } catch (err) {
+        console.warn('Subject-wise attendance endpoint might be missing, using MOCK data', err)
+        toast.error('Subject-wise attendance endpoint might be missing')
+      }
     },
     staleTime: 60 * 1000,
   })

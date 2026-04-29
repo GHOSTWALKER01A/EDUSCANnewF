@@ -16,8 +16,8 @@ export default function EventDetailModal({ open, event, onClose }: { open: boole
   if (!open || !event) return null
 
   let formattedDate = "No date"
-  if (event?.date) {
-    const parsed = typeof event.date === "string" ? parseISO(event.date) : new Date(event.date)
+  if (event?.startDate) {
+    const parsed = typeof event.startDate === "string" ? parseISO(event.startDate) : new Date(event.startDate)
     if (isValid(parsed)) {
       formattedDate = format(parsed, 'MMMM d, yyyy')
     }
@@ -32,9 +32,9 @@ export default function EventDetailModal({ open, event, onClose }: { open: boole
       >
         {/* Sticky Header with Actions */}
         <div className="absolute top-0 right-0 z-10 flex items-center gap-2 p-4">
-          {event.media?.url && (
+          {event.mediaUrl && (
             <a 
-              href={event.media.url} 
+              href={event.mediaUrl} 
               target="_blank" 
               rel="noreferrer" 
               className="p-2 rounded-full bg-black/50 hover:bg-black/70 border border-white/20 text-white transition-colors"
@@ -58,21 +58,21 @@ export default function EventDetailModal({ open, event, onClose }: { open: boole
           
           {/* Top Media Section */}
           <div className="w-full bg-black/40 min-h-[150px] sm:min-h-[200px] flex items-center justify-center border-b border-white/10 relative">
-            {event.media?.type === 'image' && event.media?.url ? (
+            {event.mediaType === 'image' && event.mediaUrl ? (
               <img 
-                src={event.media.url} 
+                src={event.mediaUrl} 
                 alt={event.title} 
                 className="w-full max-h-[50vh] object-contain bg-black/50" 
               />
-            ) : event.media?.type === 'video' && event.media?.url ? (
+            ) : event.mediaType === 'video' && event.mediaUrl ? (
               <div className="w-full h-full max-h-[50vh] aspect-video">
                 <ReactPlayer 
-                  url={event.media.url} 
+                  url={event.mediaUrl} 
                   controls 
                   width="100%" 
                   height="100%"
                   style={{ maxHeight: '50vh' }}
-                  light={event.media.thumbnailUrl || true}
+                  light={false}
                 />
               </div>
             ) : (
@@ -107,14 +107,14 @@ export default function EventDetailModal({ open, event, onClose }: { open: boole
                 </div>
               </div>
 
-              {event.time && (
+              {event.startTime && (
                 <div className="flex items-center text-blue-200">
                   <div className="p-2 bg-blue-500/10 rounded-lg mr-3 border border-blue-500/20">
                     <Clock className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
                     <p className="text-xs text-blue-400/70 font-semibold uppercase tracking-wider mb-0.5">Time</p>
-                    <p className="text-sm sm:text-base font-medium">{event.time}</p>
+                    <p className="text-sm sm:text-base font-medium">{event.startTime}</p>
                   </div>
                 </div>
               )}

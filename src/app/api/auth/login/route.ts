@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Create the Next.js response
-    const nextResponse = NextResponse.json({ data: { user } }, { status: 200 });
+    const nextResponse = NextResponse.json({ data: { user, accessToken } }, { status: 200 });
 
     // Set the HttpOnly cookie for the access token
     nextResponse.cookies.set({

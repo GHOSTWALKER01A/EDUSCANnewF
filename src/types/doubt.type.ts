@@ -15,7 +15,7 @@ export type DoubtReply = {
 }
 export type DoubtItem = {
   _id: string
-  studentId: { _id: string; fullname: string }
+  studentId: { _id: string; fullname: string; branch?: string; semester?: number }
   teacherId?: { _id: string; fullname: string }
   subject: string
   description: string

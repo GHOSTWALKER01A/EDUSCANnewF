@@ -26,7 +26,7 @@ export async function DELETE(request: Request) {
 async function handleProxy(request: Request) {
   try {
     const url = new URL(request.url);
-    const path = url.pathname.replace(/^\/api/, ''); // Remove /api prefix
+    const path = url.pathname; // Keep /api prefix since backend routes use it
     const backendUrl = `${BACKEND_URL}${path}${url.search}`;
 
     // Get the HttpOnly cookie

@@ -1,16 +1,33 @@
 // client/src/components/doubt/DoubtForm.tsx
 'use client'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useDoubts } from '../../../hooks/useDoubt'
 import {useDropzone} from 'react-dropzone'
 import { toast } from 'react-toastify'
+import api from '../../../lib/api'
 
 export default function DoubtForm() {
   const [subject, setSubject] = useState('')
   const [teacherId, setTeacherId] = useState('') 
   const [description, setDescription] = useState('')
   const [files, setFiles] = useState<File[]>([])
+  const [teachers, setTeachers] = useState<any[]>([])
   const { create } = useDoubts()
+
+  useEffect(() => {
+    // Fetch teachers dynamically
+    const fetchTeachers = async () => {
+      try {
+        const response = await api.get('/admin/records/teachers')
+        if (response.data && response.data.data) {
+          setTeachers(response.data.data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch teachers', err)
+      }
+    }
+    fetchTeachers()
+  }, [])
 
   const onDrop = useCallback((accepted: File[]) => {
     setFiles(prev => [...prev, ...accepted])
@@ -44,15 +61,18 @@ export default function DoubtForm() {
         <select value={subject} onChange={e=>setSubject(e.target.value)}
           className="col-span-2 p-2 rounded border" >
           <option value="">Select Subject Id</option>
-          <option value="subject">Maths101</option>
-          <option value="subject">Physics101</option>
-          <option value="subject">Chemistry101</option>
+          <option value="Maths101">Maths101</option>
+          <option value="Physics101">Physics101</option>
+          <option value="Chemistry101">Chemistry101</option>
           </select>
         <select value={teacherId} onChange={e=>setTeacherId(e.target.value)}
          className="p-2 rounded border">
           <option value="">Select Teacher (optional)</option>
-          <option value="teacherId1">John Sir</option>
-          <option value="teacherId2">Rita Ma'am</option>
+          {teachers.map(teacher => (
+            <option key={teacher.id} value={teacher.id}>
+              {teacher.fullname} {teacher.department ? `(${teacher.department})` : ''}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -83,7 +103,7 @@ export default function DoubtForm() {
 
       <div className="flex justify-end gap-3">
         <button type="submit" 
-        className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--bg-primary)]">
+        className="cursor-pointer px-4 py-2 rounded bg-[var(--accent)] text-[var(--bg-primary)]">
             Submit Doubt
             </button>
       </div>

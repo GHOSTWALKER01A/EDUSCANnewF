@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDown } from 'lucide-react'
@@ -9,54 +8,33 @@ export default function Hero({ onHeroInViewChange }: Props) {
   const ref = useRef<HTMLElement | null>(null)
 
   return (
-    <section ref={ref} className="relative w-full h-screen">
+    <section ref={ref} className="relative w-full h-[100svh] overflow-hidden">
       <motion.video
         autoPlay
         muted
         playsInline
         loop
-        className="w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover scale-105"
         src="/intro.mp4" 
         onViewportEnter={() => onHeroInViewChange?.(true)}
         onViewportLeave={() => onHeroInViewChange?.(false)}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(2,6,23,0.7)] to-[rgba(2,6,23,0.2)] flex flex-col items-center justify-center">
-        {/* <motion.h1
-          initial={{ opacity: 0, y: 30, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.25, duration: 0.8 }}
-          className="text-4xl md:text-6xl font-extrabold text-[var(--accent)] drop-shadow-lg text-center"
-        >
-          Empower Your Education
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 0.9, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="mt-4 max-w-2xl text-center text-[var(--text-secondary)]"
-        >
-          Smart attendance, resources and student insights — all in one platform.
-        </motion.p>
+      {/* Improved premium gradient overlay with darker edges for blending */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-primary)]/80 via-[var(--bg-primary)]/30 to-[var(--bg-primary)] flex flex-col items-center justify-center pointer-events-none" />
 
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={() => {
-            // scroll down to next section smoothly
-            window.scrollTo({ top: window.innerHeight - 30, behavior: 'smooth' })
-          }}
-          className="mt-10 px-6 py-3 rounded-full bg-[var(--accent)] text-[var(--bg-primary)] font-semibold shadow-lg"
-        >
-          Explore
-        </motion.button> */}
-
+      {/* Animated scroll down indicator */}
+      <div className="absolute bottom-12 w-full flex justify-center z-10">
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-          className="absolute bottom-10"
+          animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
           aria-hidden
+          className="flex flex-col items-center gap-2"
         >
-          <ArrowDown className="w-8 h-8 text-[var(--accent)] drop-shadow-[0_0_12px_rgba(0,212,255,0.8)]" strokeWidth={1.5} />
+          <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--accent)] drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]">Scroll to explore</span>
+          <div className="p-3 rounded-full bg-[var(--bg-primary)]/40 backdrop-blur-md border border-[var(--border-color)]/30 shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)]">
+            <ArrowDown className="w-6 h-6 text-[var(--accent)]" strokeWidth={2} />
+          </div>
         </motion.div>
       </div>
     </section>

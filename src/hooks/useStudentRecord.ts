@@ -32,7 +32,7 @@ export function useStudents({
   const query = useQuery<StudentsListResponse>({
     queryKey: ['students', { page, perPage, q, semester, branch, sortKey, sortDir }],
     queryFn: async () => {
-      const res = await api.get('/api/student-record', {
+      const res = await api.get('/student-record', {
         params: { page, perPage, q, semester, branch, sortKey, sortDir },
       });
       return res.data.data as StudentsListResponse;
@@ -44,36 +44,50 @@ export function useStudents({
 
   const toggleBlock = useMutation({
     mutationFn: async ({ id, blocked }: { id: string; blocked: boolean }) => {
-      const res = await api.put(`/api/student-record/${id}/block`, { blocked });
+      const res = await api.put(`/student-record/${id}/block`, { blocked });
       return res.data.data;
     },
 
     onMutate: async ({ id, blocked }) => {
+      // 1. Cancel any outgoing fetches for all student queries
       await queryClient.cancelQueries({ queryKey: ['students'] });
 
-      const previous = queryClient.getQueryData<StudentsListResponse>(['students']);
-
-      queryClient.setQueryData<StudentsListResponse>(['students'], (old) => {
-        if (!old?.students) return old;
-
-        return {
-          ...old,
-          students: old.students.map((s) =>
-            s._id === id ? { ...s, blocked: blocked } : s
-          ),
-        };
+      // 2. Snapshot the state of ALL cached pages/filters for rollback
+      const previousQueries = queryClient.getQueriesData<StudentsListResponse>({ 
+        queryKey: ['students'] 
       });
 
-      return { previous };
+      // 3. Optimistically update ALL matching queries
+      queryClient.setQueriesData<StudentsListResponse>(
+        { queryKey: ['students'] }, // This acts as a partial match now
+        (old) => {
+          // If this specific cache page doesn't have data, leave it alone
+          if (!old?.students) return old;
+
+          return {
+            ...old,
+            students: old.students.map((s) =>
+              s._id === id ? { ...s, blocked: blocked } : s
+            ),
+          };
+        }
+      );
+
+      // Return the snapshot of all queries for the onError handler
+      return { previousQueries };
     },
 
     onError: (err, variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['students'], context.previous);
+      // 4. Rollback: Loop through our snapshot and restore every cache key
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, previousData]) => {
+          queryClient.setQueryData(queryKey, previousData);
+        });
       }
     },
 
     onSettled: () => {
+      // 5. Always force a background sync with the server to ensure truth
       queryClient.invalidateQueries({ queryKey: ['students'] });
     },
   });

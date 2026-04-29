@@ -43,7 +43,7 @@ export default function HomePage() {
         <EduscanIntro onFinish={() => setShowIntro(false)} />
       ) : (
         <>
-          <Navbardummy onOpenIntro={() => setShowIntro(true)} />
+          <Navbardummy />
 
           {/* Hero */}
           <section className="relative w-full overflow-hidden bg-gradient-to-br from-bgSecondary to-bgPrimary px-8 md:px-24 pt-36 pb-28">

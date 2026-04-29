@@ -4,6 +4,7 @@ export type Material = {
   title: string;
   description?: string;
   category: string;
+  resourceType?: string;
   fileUrl?: string;
   fileType?: string;
   filePreview?: string; 

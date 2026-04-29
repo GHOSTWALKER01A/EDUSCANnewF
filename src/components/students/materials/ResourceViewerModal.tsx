@@ -1,11 +1,27 @@
 'use client'
+
+if (typeof window === 'undefined') {
+  (global as any).Promise.withResolvers = function () {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
+  if (!(global as any).DOMMatrix) {
+    (global as any).DOMMatrix = class {};
+  }
+}
+
 import React, { useEffect, useRef } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { Resource } from '../../../types/resource.type'
 
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
-
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+}
 export default function ResourceViewerModal({
   open,
   resource,

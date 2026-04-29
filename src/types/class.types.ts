@@ -16,7 +16,10 @@ export type ClassItem = {
   totalStudents?: number;
   classStatus?: 'scheduled'|'rescheduled'|'cancelled';
   qrSession?: QRSession;
+  isConfirmed?: boolean;
 };
+
+
 
 export type Profile = {
   fullname: string;

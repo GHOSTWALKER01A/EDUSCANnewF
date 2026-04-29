@@ -8,12 +8,12 @@ type ListResponse = { events: TeacherEvent[]; total: number };
 
 
 
-export function useEvents(page = 1, perPage = 6, q = "") {
+export function useEvents(page = 1, perPage = 6, q = "", category?: string) {
   const qc = useQueryClient();
   const query = useQuery<ListResponse>({
-    queryKey: ["events", page, perPage, q],
+    queryKey: ["events", page, perPage, q, category],
     queryFn: async () => {
-      const res = await api.get("/api/events", { params: { page, perPage, q }});
+      const res = await api.get("/events", { params: { page, perPage, q, category }});
       return res.data.data as ListResponse;
     },
     placeholderData: keepPreviousData,
@@ -22,13 +22,13 @@ export function useEvents(page = 1, perPage = 6, q = "") {
 
   const create = useMutation({
     mutationFn: async (fd: FormData) => {
-      const res = await api.post("/api/events", fd, {
+      const res = await api.post("/events", fd, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       return res.data.data.event as TeacherEvent;
     },
     onSuccess: (created) => {
-      qc.setQueryData(["events", 1, perPage, ""], (old: any) => {
+      qc.setQueryData(["events", 1, perPage, "", undefined], (old: any) => {
         if (!old) return { events: [created], total: 1 };
         return { ...old, events: [created, ...old.events], total: (old.total || 0) + 1 };
       });
@@ -38,7 +38,7 @@ export function useEvents(page = 1, perPage = 6, q = "") {
 
   const update = useMutation({
     mutationFn: async ({ id, fd }: { id: string; fd: FormData }) => {
-      const res = await api.put(`/api/events/${id}`, fd, {
+      const res = await api.put(`/events/${id}`, fd, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       return res.data.data.event as TeacherEvent;
@@ -48,7 +48,7 @@ export function useEvents(page = 1, perPage = 6, q = "") {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/api/events/${id}`);
+      await api.delete(`/events/${id}`);
       return id;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["events"] })

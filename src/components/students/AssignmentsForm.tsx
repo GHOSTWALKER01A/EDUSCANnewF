@@ -17,10 +17,12 @@ export default function AssignmentForm({
   initial,
   onCancel,
   onSaved,
+  onSave,
 }: {
   initial?: AssignmentPayload | null
   onCancel: () => void
   onSaved: (saved: any) => void
+  onSave: (id: string | undefined, fd: FormData) => Promise<any>
 }) {
   const [subject, setSubject] = useState(initial?.subject ?? '')
   const [description, setDescription] = useState(initial?.description ?? '')
@@ -70,21 +72,9 @@ export default function AssignmentForm({
       fd.append('description', description ?? '')
       if (file) fd.append('file', file)
 
-      let resp
-      if (initial && initial._id) {
-        resp = await api.put(`/api/assignments/${initial._id}`,
-           fd, 
-           { headers: { 'Content-Type': 'multipart/form-data' } 
-          })
-      } else {
-        resp = await api.post('/api/assignments',
-           fd,
-            { headers: { 'Content-Type': 'multipart/form-data' } 
-          })
-      }
+      const saved = await onSave(initial?._id, fd)
 
-      toast.success('Assignment saved')
-      onSaved(resp.data.data)
+      onSaved(saved)
     } catch (err: any) {
       console.error(err)
       toast.error(err?.response?.data?.message || 'Save failed')

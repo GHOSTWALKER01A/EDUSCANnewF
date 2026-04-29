@@ -8,10 +8,14 @@ export type EventItem = {
   _id: string
   title: string
   description?: string
-  date: string // ISO
-  time: string
+  startDate?: string
+  date?: string // ISO
+  startTime?: string
+  time?: string
   location?: string
   category?: string
+  mediaUrl?: string
+  mediaType?: 'image' | 'video' | 'none'
   media?: EventMedia
   createdBy?: { _id: string; fullname?: string }
   createdAt?: string

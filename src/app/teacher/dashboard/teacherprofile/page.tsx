@@ -1,40 +1,68 @@
-"use client"
-
-
+"use client";
 
 import React, { useState, useEffect } from "react";
-
+import { motion, Variants } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import type { Profile, StudentListItem } from "../../../../types/class.types";
-import { useTeacherClasses } from "../../../../hooks/useTeacherClasses";
+
+import Navbar from '@/src/components/layouts/NavbarTeacher';
+import Footer from "@/src/components/layouts/Footer";
 import QRModal from "../../../../components/teachers/QrModal";
 import StudentInfo from "../../../../components/teachers/StudentInfo";
-import Button from "../../../../components/UI/Button";
+import { useTeacherClasses } from "../../../../hooks/useTeacherClasses";
 import api from "../../../../lib/api";
-import { toast,ToastContainer } from "react-toastify"; 
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import NavbarTeacher from '@/src/components/layouts/NavbarTeacher'
-import Footer from '@/src/components/layouts/Footer'
+import type { Profile, StudentListItem } from "../../../../types/class.types";
+import { useAuth } from "../../../../context/AuthContext";
 
-
-
-
+// Imported Profile Components
+import ProfileHeader from "@/src/components/teachers/profile/ProfileHeader";
+import StatsGrid from "@/src/components/teachers/profile/StatsGrid";
+import ScheduleTable from "@/src/components/teachers/profile/ScheduleTable";
+import AttendanceChart from "@/src/components/teachers/profile/AttendanceChart";
+import RescheduleModal from "@/src/components/teachers/profile/RescheduleModal";
+import EditProfileModal from "@/src/components/teachers/profile/EditProfileModal";
+import DailyScheduleModal from "@/src/components/teachers/profile/DailyScheduleModal";
+import AssignmentsModal from "@/src/components/students/AssignmentsModal";
+import TeacherAttendanceModal from "@/src/components/teachers/profile/TeacherAttendanceModal";
+import { useAssignments } from "@/src/hooks/useAssignments";
+import { useDoubtOverview } from "@/src/hooks/useDoubt";
+import { useTeacherAttendanceStats } from "@/src/hooks/useTeacherAttendanceStats";
 
 export default function TeacherProfilePage() {
   const router = useRouter();
-  const [profile, setProfile] = React.useState<Profile | null>(null);
-  const { classes, loading, qrSession, startQr, endQr, fetchStudents, cancelClass, rescheduleClass } = useTeacherClasses();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const { logout } = useAuth();
+  
+  // Custom Hook for class logic
+  const { classes, loading, qrSession, startQr, endQr, fetchStudents, rescheduleClass, confirmClass } = useTeacherClasses();
+  
+  // Custom Hook for assignments
+  const { assignments, loading: assignmentsLoading, deleteAssignment, saveAssignment } = useAssignments();
+  
+  // Custom Hook for doubt overview
+  const { count: pendingDoubtsCount } = useDoubtOverview();
+
+  // Custom Hook for teacher attendance stats
+  const { stats: attendanceStats } = useTeacherAttendanceStats();
+
+  // UI State
   const [qrOpen, setQrOpen] = useState(false);
   const [studentsOpen, setStudentsOpen] = useState(false);
   const [students, setStudents] = useState<StudentListItem[] | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isAssignmentsModalOpen, setIsAssignmentsModalOpen] = useState(false);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
 
+  // Reschedule modal state
+  const [rescheduleTarget, setRescheduleTarget] = useState<string | null>(null);
+  const [rescheduleForm, setRescheduleForm] = useState({ newDate: "", newTime: "", newRoom: "" });
   
   useEffect(() => {
-    
-    (async () => {
+    const fetchProfile = async () => {
       try {
-        const res = await api.get("/api/student/profile");
+        const res = await api.get("/teacher/profile");
         const d = res.data.data || res.data;
         setProfile({
           fullname: d.fullname,
@@ -46,17 +74,19 @@ export default function TeacherProfilePage() {
           profilePhoto: d.profilephoto,
         });
       } catch (err: any) {
-        console.error(err);
-        toast.error("Failed to load profile");
-      } 
-    })();
+        console.error("Failed to load profile data", err);
+        toast.error("Failed to load profile data");
+      }
+    };
+    fetchProfile();
   }, []);
 
+  // --- Handlers ---
   const onStartQr = async (classId: string) => {
     try {
       await startQr(classId);
       setQrOpen(true);
-    } catch (err:any) {
+    } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to start QR");
     }
   };
@@ -75,100 +105,154 @@ export default function TeacherProfilePage() {
     try {
       await endQr();
       setQrOpen(false);
-      toast.info("QR session ended");
+      toast.info("QR session ended successfully");
     } catch (err) {
-      toast.error("Failed to end QR");
+      toast.error("Failed to end QR session");
     }
   };
+
+  const onRescheduleSubmit = async () => {
+    if (!rescheduleTarget) return;
+    const { newDate, newTime, newRoom } = rescheduleForm;
+    if (!newDate || !newTime || !newRoom) {
+      toast.warn("Please fill in all reschedule fields.");
+      return;
+    }
+    try {
+      await rescheduleClass(rescheduleTarget, newDate, newTime, newRoom);
+      toast.success("Class rescheduled!");
+      setRescheduleTarget(null);
+      setRescheduleForm({ newDate: "", newTime: "", newRoom: "" });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to reschedule class");
+    }
+  };
+
+  const handleOpenReschedule = (classId: string) => {
+    setRescheduleTarget(classId);
+    setRescheduleForm({ newDate: "", newTime: "", newRoom: "" });
+  };
+
+  const blockVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
   return (
-    <>
-      <NavbarTeacher />
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-secondary)] to-[var(--bg-primary)] relative overflow-x-hidden">
+      {/* Global Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none border-none">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-3xl" />
+      </div>
 
-      <ToastContainer  position="top-right" autoClose={3000} />
-    <div className="max-w-6xl mt-16 mx-auto p-6">
-      <h1 className="text-3xl font-bold text-[var(--accent)]">Teacher Profile</h1>
-     
-     
-       {profile ? (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-[var(--card-bg)] p-6 rounded-xl shadow-[0_8px_20px_var(--shadow)]">
-        <div className="flex gap-6 items-center">
-        <div className="w-36 h-36 rounded-full border-4 border-[var(--accent)] overflow-hidden">
-          {profile.profilePhoto ? (
-           
-            <img src={profile.profilePhoto} alt="Profile" className="object-cover w-full h-full" />
-          ) : (
-            <div className="w-full h-full bg-slate-700 flex items-center justify-center text-white text-xl">{profile.fullname?.[0]}</div>
-          )}
-        </div>
+      <Navbar/>
+      <ToastContainer position="bottom-right"
+       autoClose={3000} theme="dark" 
+       toastClassName="bg-[var(--card-bg)] text-[var(--text-primary)] border border-[var(--shadow)]/10" />
 
-        <div className="flex-1">
-          <h1 className="text-3xl md:text-4xl font-bold text-[var(--accent)]">{profile.fullname}</h1>
-          <div className="mt-2 text-[var(--text-secondary)] space-y-1">
-            <div>Teacher ID: <strong className="text-white">{profile.id}</strong></div>
-            <div>Email: <strong className="text-white">{profile.email}</strong></div>
-            <div>Phone: <strong className="text-white">{profile.phoneNumber || '—'}</strong></div>
-            <div>Department: <strong className="text-white">{profile.department}</strong></div>
-            <div>Join Date: <strong className="text-white">{profile.joinDate}</strong></div>
-          </div>
-
-          <div className="mt-4 flex gap-3">
-     
-          </div>
-        </div>
-        </div>
-      </motion.div>
-      
-      ) : <div>Loading profile...</div>}
-
-  
-      <section className="mt-8">
-        <h2 className="text-2xl font-semibold text-[var(--accent)]">Today's Classes</h2>
-        <div className="mt-4 bg-[var(--card-bg)] p-4 rounded">
-          {loading ? <div>Loading classes...</div> : 
-          classes.length === 0 ? <div className="p-4">
-            No classes today</div> : (
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="text-left">Subject</th>
-                  <th>Branch</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Room</th>
-                  <th>Present</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {classes.map((c) => (
-                  <tr key={c._id} className="border-t">
-                    <td>{c.subject}</td>
-                    <td>{c.branch}</td>
-                    <td>{new Date(c.date).toLocaleDateString()}</td>
-                    <td>{c.time}</td>
-                    <td>{c.room}</td>
-                    <td>{c.studentsPresent || 0}/{c.totalStudents || 0}</td>
-                    <td className="flex gap-2">
-                      <Button className="bg-[var(--accent)] text-[var(--bg-primary)]" onClick={() => onOpenStudents(c._id)}>Students</Button>
-                      <Button className="bg-[var(--accent)] text-[var(--bg-primary)]" onClick={() => onStartQr(c._id)}>Generate QR</Button>
-                      <Button className="border border-[var(--accent)]" onClick={() => cancelClass(c._id)}>Cancel</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </section>
-  
-     <QRModal open={qrOpen} session={qrSession} onEnd={onEndQr} onClose={() => setQrOpen(false)} />
-     <StudentInfo open={studentsOpen} students={students} onClose={() => setStudentsOpen(false)} />
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 mt-20 md:mt-24 space-y-8 relative z-10 pb-24">
+        <motion.div 
+           initial="hidden" 
+           animate="visible" 
+           variants={{
+             visible: { transition: { staggerChildren: 0.15 } }
+           }}
+           className="space-y-8"
+        >
         
+        {/* Profile Header */}
+        <motion.div variants={blockVariants}>
+          {profile ? (
+            <ProfileHeader 
+              profile={profile} 
+              onEditClick={() => setIsEditModalOpen(true)} 
+              onLogout={logout} 
+              onQrClick={() => router.push('/teacher/dashboard/teacherattendance')}
+            />
+          ) : (
+            <div className="h-72 bg-[var(--card-bg)]/40 animate-pulse rounded-3xl flex items-center justify-center text-[var(--text-secondary)] backdrop-blur-xl border border-[var(--shadow)]/10">Loading profile data...</div>
+          )}
+        </motion.div>
+
+        {/* Quick Summary Cards */}
+        <motion.div variants={blockVariants}>
+          <StatsGrid 
+            onClassesAttendedClick={() => setIsScheduleModalOpen(true)}
+            onAssignmentsClick={() => setIsAssignmentsModalOpen(true)} 
+            onPendingDoubtsClick={() => router.push('/teacher/dashboard/teacherdoubts')}
+            onAttendanceRateClick={() => setIsAttendanceModalOpen(true)}
+            pendingDoubtsCount={pendingDoubtsCount}
+            classesAttended={attendanceStats?.classesAttended}
+            totalClasses={attendanceStats?.totalClasses}
+            attendanceRate={attendanceStats?.rate}
+            activeAssignmentsCount={assignments?.length || 0}
+          />
+        </motion.div>
+
+        {/* Today's Schedule Table */}
+        <motion.div variants={blockVariants}>
+          <ScheduleTable 
+            classes={classes} 
+            loading={loading} 
+            onStartQr={onStartQr} 
+            onOpenStudents={onOpenStudents} 
+            onOpenReschedule={handleOpenReschedule} 
+          />
+        </motion.div>
+
+        {/* Attendance Chart */}
+        <motion.div variants={blockVariants}>
+          <AttendanceChart />
+        </motion.div>
+        
+        </motion.div>
+      </main>
+
+      {/* Modals rendered outside main layout flow */}
+      {qrOpen && <QRModal open={qrOpen} session={qrSession} onEnd={onEndQr} onClose={() => setQrOpen(false)} />}
+      {studentsOpen && <StudentInfo open={studentsOpen} students={students} onClose={() => setStudentsOpen(false)} />}
+      
+      <RescheduleModal 
+        isOpen={!!rescheduleTarget}
+        form={rescheduleForm}
+        onFormChange={setRescheduleForm}
+        onClose={() => setRescheduleTarget(null)}
+        onSubmit={onRescheduleSubmit}
+      />
+      
+      <EditProfileModal 
+        open={isEditModalOpen} 
+        profile={profile} 
+        onClose={() => setIsEditModalOpen(false)} 
+        onSaved={(updated) => setProfile(updated)} 
+      />
+
+      <DailyScheduleModal 
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        classes={classes}
+        onOpenReschedule={handleOpenReschedule}
+        onOpenStudents={onOpenStudents}
+        onConfirmClass={confirmClass}
+      />
+
+      <AssignmentsModal
+        open={isAssignmentsModalOpen}
+        onClose={() => setIsAssignmentsModalOpen(false)}
+        assignments={assignments}
+        loading={assignmentsLoading}
+        onDelete={deleteAssignment}
+        onSave={saveAssignment}
+      />
+
+      <TeacherAttendanceModal
+        isOpen={isAttendanceModalOpen}
+        onClose={() => setIsAttendanceModalOpen(false)}
+        stats={attendanceStats}
+      />
+
+      <Footer />
     </div>
-  
-
-
-      <Footer/>
-    </>
   );
 }

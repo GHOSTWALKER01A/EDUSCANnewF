@@ -9,15 +9,40 @@ const api = axios.create({
   timeout: 15000,
 })
 
-// Removed the request interceptor that reads localStorage 'accessToken' format.
-// The backend needs to read the token from the HttpOnly cookie directly now, 
-// or through a common mechanism if using Next.js proxies everywhere.
+// Add request interceptor to ensure authorization header is always present
+// This ensures stability if HttpOnly cookies fail or we're in a mixed proxy state
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+  }
+  return config
+}, (error) => {
+  return Promise.reject(error)
+})
 
-// Response interceptor for 401 seamless refresh
+// Delay helper
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Response interceptor for Network Retries & 401 seamless refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
+    
+    // 1. Exponential Backoff for 5xx or Network Errors
+    if (originalRequest && (!error.response || error.response.status >= 500)) {
+      originalRequest._retryCount = originalRequest._retryCount || 0;
+      if (originalRequest._retryCount < 2) {
+        originalRequest._retryCount += 1;
+        const backoff = Math.pow(2, originalRequest._retryCount) * 1000;
+        console.warn(`API Error. Retrying in ${backoff}ms...`);
+        await delay(backoff);
+        return api(originalRequest);
+      }
+    }
     
     // If the error status is 401 and there is no originalRequest._retry flag
     if (error.response?.status === 401 && !originalRequest._retry) {

@@ -4,12 +4,41 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '../../context/AuthContext'
 
 type Props = { heroInView: boolean }
+
+// ─── EduScan Icon Mark ───────────────────────────────────────────────────────
+function EduScanIconMark() {
+  return (
+    <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] border border-[var(--accent)]/30 group-hover:border-[var(--accent)]/80 transition-colors duration-500 overflow-hidden shadow-[0_0_15px_rgba(194,184,255,0.05)] group-hover:shadow-[0_0_20px_rgba(194,184,255,0.25)]">
+      {/* Scanner Laser Animation */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-[var(--accent)] shadow-[0_0_12px_2px_var(--accent)] opacity-80 animate-[scan_3s_ease-in-out_infinite]" />
+
+      {/* Custom SVG: Open Book + Scanner Reticles */}
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] text-[var(--accent)] group-hover:scale-105 transition-transform duration-500">
+        {/* Scanner Reticles (Corners) */}
+        <path d="M4 8V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M4 16V18C4 19.1046 4.89543 20 6 20H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M20 8V6C20 4.89543 19.1046 4 18 4H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M20 16V18C20 19.1046 19.1046 20 18 20H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+
+        {/* Open Book */}
+        <path d="M12 8V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M12 16C12 16 9.5 14.5 7 14.5V7.5C9.5 7.5 12 8 12 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M12 16C12 16 14.5 14.5 17 14.5V7.5C14.5 7.5 12 8 12 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function NavBar({ heroInView }: Props) {
   // show nav once hero not in view (i.e., after scroll)
   const [show, setShow] = useState(false)
+  const { user } = useAuth()
+  const photoUrl = user?.profilePhoto || (user as any)?.profilephoto
+  const [imgError, setImgError] = useState(false)
 
   useEffect(() => {
     setShow(!heroInView)
@@ -28,9 +57,18 @@ export default function NavBar({ heroInView }: Props) {
             {/* fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-10 py-3 bg-gradient-to-r from-bgSecondary to-bgPrimary shadow-lg */}
           <div className="max-w-7xl mx-auto px-6 md:px-8 py-3 flex items-center justify-between">
             <div className="text-[var(--accent)] font-extrabold text-2xl">
-            <Link href="/" className="flex items-center gap-3 text-[var(--accent)] font-bold text-xl">
-          <Image src="/logo.png" width={44} height={44} alt="logo" />
-          EduScan
+           <Link href="/" className="group relative flex items-center gap-3 z-50">
+          
+          {/* The "EduScan" Icon Mark */}
+          <EduScanIconMark />
+
+          {/* Typography */}
+          <div className="flex flex-col justify-center">
+            <span className="text-2xl md:text-3xl font-extrabold tracking-tight">
+              <span className="text-white">Edu</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-dark)]">Scan</span>
+            </span>
+          </div>
         </Link>
             </div>
             <nav className="hidden md:flex gap-6 text-sm text-[var(--text-secondary)]">
@@ -44,9 +82,28 @@ export default function NavBar({ heroInView }: Props) {
             </nav>
              <div className="flex items-center gap-3">
                 
-          <Link href="/student/dashboard/profile"><Image src="/profile.png" alt="profile" width={38} height={38} className="rounded-full" /></Link>
+          <Link href="/student/dashboard/profile">
+            {photoUrl && !imgError ? (
+              <img 
+                src={photoUrl} 
+                alt="profile" 
+                className="w-[38px] h-[38px] rounded-full object-cover border border-[var(--shadow)]/10" 
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <Image src="/profile.png" alt="profile" width={38} height={38} className="rounded-full" />
+            )}
+          </Link>
         </div>
           </div>
+           <style>{`
+        @keyframes scan {
+          0% { top: 0; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
+        }
+      `}</style>
         </motion.header>
       )}
     </AnimatePresence>
