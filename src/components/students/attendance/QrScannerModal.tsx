@@ -1,13 +1,11 @@
 'use client'
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import QrScanner from 'qr-scanner';
+import type QrScanner from 'qr-scanner';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Camera, MapPin, CheckCircle, XCircle, Keyboard, QrCode } from 'lucide-react';
 import api from '@/src/lib/api';
 import * as FingerprintJS from '@fingerprintjs/fingerprintjs';
-
-QrScanner.WORKER_PATH = `/node_modules/qr-scanner/qr-scanner-worker.min.js`;
 
 export default function QRScannerModal({ open, onClose, onSuccess }: { open: boolean; onClose: ()=>void; onSuccess?: (attendance:any)=>void }) {
   const videoRef = useRef<HTMLVideoElement|null>(null);
@@ -42,9 +40,10 @@ export default function QRScannerModal({ open, onClose, onSuccess }: { open: boo
       const startScanner = async () => {
         if (!videoRef.current) return;
         try {
+          const QrScannerModule = (await import('qr-scanner')).default;
           if (scannerRef.current) stopScanner();
           
-          scannerRef.current = new QrScanner(videoRef.current, result => {
+          scannerRef.current = new QrScannerModule(videoRef.current, result => {
             if (!active) return;
             handleScan(result.data);
           }, { highlightScanRegion: true, highlightCodeOutline: true });

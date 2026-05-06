@@ -4,9 +4,11 @@ import { motion } from 'framer-motion'
 import { Library, Sparkles } from 'lucide-react'
 import Navbar from '@/src/components/layouts/Navbar'
 import Footer from '@/src/components/layouts/Footerstu'
-import AcademicMaterials from '@/src/components/students/materials/AcademicMaterials'
-import PreviousYearPapers from '@/src/components/students/materials/PreviousYearPapers'
-import GeneralMaterials from '@/src/components/students/materials/GeneralMaterials'
+import dynamic from 'next/dynamic'
+
+const AcademicMaterials = dynamic(() => import('@/src/components/students/materials/AcademicMaterials'), { ssr: false })
+const PreviousYearPapers = dynamic(() => import('@/src/components/students/materials/PreviousYearPapers'), { ssr: false })
+const GeneralMaterials = dynamic(() => import('@/src/components/students/materials/GeneralMaterials'), { ssr: false })
 
 export default function MaterialsPage() {
   return (

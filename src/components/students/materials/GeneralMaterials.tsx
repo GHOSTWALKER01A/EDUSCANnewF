@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import { motion, Variants } from 'framer-motion'
 import { Search, FolderOpen } from 'lucide-react'
 import ResourceCard from './ResourceCard'
-import ResourceViewerModal from './ResourceViewerModal'
+import dynamic from 'next/dynamic'
+const ResourceViewerModal = dynamic(() => import('./ResourceViewerModal'), { ssr: false })
 import { useMaterials } from '../../../hooks/useMaterials'
 import { Resource } from '../../../types/resource.type'
 

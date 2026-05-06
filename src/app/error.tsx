@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import * as Sentry from '@sentry/nextjs'
 import { AlertCircle } from 'lucide-react'
 
 // Segment error boundary
@@ -13,9 +12,8 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to Sentry automatically
+    // Log the error to console
     console.error('Captured by Error Boundary:', error)
-    Sentry.captureException(error)
   }, [error])
 
   return (
