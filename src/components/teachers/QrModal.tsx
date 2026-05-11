@@ -7,7 +7,7 @@ import Button from "../UI/Button";
 
 type Props = {
   open: boolean;
-  session: { sessionId: string; token: string; classId: string } | null;
+  session: { sessionId: string; token: string; classId: string; totpSecret?: string } | null;
   onEnd: () => Promise<void>;
   onClose: () => void;
 };
@@ -23,10 +23,15 @@ export default function QRCodeModal({ open, session, onEnd, onClose }: Props) {
         {session ? (
           <>
             <div className="bg-white p-4 rounded">
-              <QRCode value={session.token} size={240} />
+              <QRCode value={JSON.stringify({ qrToken: session.token, lectureId: session.classId })} size={240} />
             </div>
             <p className="text-sm text-[var(--text-secondary)]">Session ID: {session.sessionId}</p>
-            <div className="flex gap-2">
+            {session.totpSecret && (
+              <p className="text-sm font-bold text-[var(--accent)] mt-2">
+                Use Teacher Attendance Dashboard to display rotating code.
+              </p>
+            )}
+            <div className="flex gap-2 mt-4">
               <Button className="bg-[var(--accent)] text-[var(--bg-primary)]" onClick={handleEnd}>End QR</Button>
               <Button className="border border-[var(--accent)] text-[var(--accent)]" onClick={onClose}>Close</Button>
             </div>
